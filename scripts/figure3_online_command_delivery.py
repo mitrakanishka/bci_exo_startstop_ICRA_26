@@ -12,6 +12,7 @@ import pandas as pd
 from matplotlib.ticker import PercentFormatter
 
 THIS_DIR = Path(__file__).resolve().parent
+REPO_ROOT = THIS_DIR.parent
 sys.path.insert(0, str(THIS_DIR))
 
 from _shared.online_log_parser import load_all_online_logs
@@ -199,19 +200,19 @@ def main() -> None:
     parser.add_argument(
         "--log-root",
         type=Path,
-        default=Path("BCI_course_EXP") / "online_python_log",
+        default=REPO_ROOT / "BCI_course_EXP" / "online_python_log",
         help="Path to online_python_log directory.",
     )
     parser.add_argument(
         "--outdir",
         type=Path,
-        default=Path("figures") / "paper",
+        default=REPO_ROOT / "figures" / "paper",
         help="Output figure directory.",
     )
     parser.add_argument(
         "--csv-out",
         type=Path,
-        default=Path("data") / "processed" / "fig3_group_composition.csv",
+        default=REPO_ROOT / "data" / "processed" / "fig3_group_composition.csv",
         help="Path to save aggregated composition table.",
     )
     args = parser.parse_args()

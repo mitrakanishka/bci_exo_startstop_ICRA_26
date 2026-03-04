@@ -6,8 +6,8 @@ Expected input files (created by EXPORT_FIG_DATA.m):
   fig_data/fig2_auc_subject_run.csv
 
 Mapped outputs:
-  data/processed/fig5_bias_task_vs_identity.csv
-  data/processed/fig6_auc_subject_run.csv
+  data/processed/fig1_bias_task_vs_identity.csv
+  data/processed/fig2_auc_subject_run.csv
 """
 
 from __future__ import annotations
@@ -23,8 +23,8 @@ def main() -> None:
     dst_dir.mkdir(parents=True, exist_ok=True)
 
     mapping = {
-        src_dir / "fig1_bias_task_vs_identity.csv": dst_dir / "fig5_bias_task_vs_identity.csv",
-        src_dir / "fig2_auc_subject_run.csv": dst_dir / "fig6_auc_subject_run.csv",
+        src_dir / "fig1_bias_task_vs_identity.csv": dst_dir / "fig1_bias_task_vs_identity.csv",
+        src_dir / "fig2_auc_subject_run.csv": dst_dir / "fig2_auc_subject_run.csv",
     }
 
     missing = [str(p) for p in mapping if not p.exists()]

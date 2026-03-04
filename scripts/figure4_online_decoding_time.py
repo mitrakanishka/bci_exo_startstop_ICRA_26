@@ -13,6 +13,7 @@ import pandas as pd
 import matplotlib.patches as mpatches
 
 THIS_DIR = Path(__file__).resolve().parent
+REPO_ROOT = THIS_DIR.parent
 sys.path.insert(0, str(THIS_DIR))
 
 from _shared.online_log_parser import load_all_online_logs
@@ -149,19 +150,19 @@ def main() -> None:
     parser.add_argument(
         "--log-root",
         type=Path,
-        default=Path("BCI_course_EXP") / "online_python_log",
+        default=REPO_ROOT / "BCI_course_EXP" / "online_python_log",
         help="Path to online_python_log directory.",
     )
     parser.add_argument(
         "--outdir",
         type=Path,
-        default=Path("figures") / "paper",
+        default=REPO_ROOT / "figures" / "paper",
         help="Output figure directory.",
     )
     parser.add_argument(
         "--stats-out",
         type=Path,
-        default=Path("data") / "processed" / "fig4_session2_vs3_stats.csv",
+        default=REPO_ROOT / "data" / "processed" / "fig4_session2_vs3_stats.csv",
         help="Path to save paired-session stats.",
     )
     args = parser.parse_args()
