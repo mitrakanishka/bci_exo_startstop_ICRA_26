@@ -249,7 +249,7 @@ def main() -> None:
     parser.add_argument(
         "--csv-out",
         type=Path,
-        default=REPO_ROOT / "data" / "fig3_group_composition.csv",
+        default=REPO_ROOT / "fig_data" / "fig3_group_composition.csv",
         help="Path to save aggregated composition table.",
     )
     args = parser.parse_args()

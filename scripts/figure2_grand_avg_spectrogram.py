@@ -239,13 +239,13 @@ def main() -> None:
     parser.add_argument(
         "--matrix-csv",
         type=Path,
-        default=REPO_ROOT / "data" / "fig2_grand_avg_spectrogram_matrix.csv",
+        default=REPO_ROOT / "fig_data" / "fig2_grand_avg_spectrogram_matrix.csv",
         help="Path to save the grand-average PSD matrix.",
     )
     parser.add_argument(
         "--meta-json",
         type=Path,
-        default=REPO_ROOT / "data" / "fig2_grand_avg_spectrogram_meta.json",
+        default=REPO_ROOT / "fig_data" / "fig2_grand_avg_spectrogram_meta.json",
         help="Path to save figure metadata.",
     )
     parser.add_argument(

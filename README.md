@@ -1,91 +1,79 @@
-# BCI Harmony Start/Stop Repository
+# Real-Time Onset and Offset BCI Exoskeleton
 
-This repository contains starter code and analysis scripts for working with the BCI Harmony experimental dataset. The codebase is organized to support both:
+Repository for the paper: **Real-Time Decoding of Movement Onset and Offset for Brain-Controlled Rehabilitation Exoskeleton**
 
-- beginner-friendly offline preprocessing and visualization
-- reproducible figure generation directly from the underlying experiment data
+This repository contains:
 
-The repository expects the experimental dataset folder, `BCI_Harmony_ExperimentalData/`, to live at the repository root. That folder is kept outside version control, while this repository stores the analysis code, starter workflows, and generated outputs.
+- starter workflows for loading and preprocessing offline EEG recordings
+- reproducible Python scripts for regenerating the paper figures directly from the experiment data
+- figure-ready outputs written to `fig_data/` and `figures/`
+
+The repository assumes the experimental dataset folder `BCI_Harmony_ExperimentalData/` is placed at the repository root and kept outside version control.
 
 ## Repository Overview
 
 ```text
 bci_exo_startstop_ICRA_26/
-├── BCI_Harmony_ExperimentalData/   # local experiment data (not tracked by git)
-├── starter/                        # starter MATLAB and Python workflows
-├── scripts/                        # reproducible analysis and figure scripts
-├── data/                           # generated tables and metadata
-├── figures/                        # generated figures
-└── environment.yml                 # conda environment definition
+├── BCI_Harmony_ExperimentalData/   # local experiment data used by the analyses
+├── starter/                        # entry-point MATLAB and Python starter workflows
+├── scripts/                        # reproducible figure-generation scripts
+├── fig_data/                       # generated tables, metadata, and trigger inventories
+├── figures/                        # generated paper figures
+├── environment.yml                 # Python environment definition
+└── LICENSE
 ```
 
 ## 1. Environment Setup
 
-This repository uses a Conda environment named `BCI`.
+### Python environment
 
-### Create the environment
+Create the Conda environment with:
 
 ```bash
 conda env create -f environment.yml
 conda activate BCI
 ```
 
-### Update an existing environment
+### MATLAB requirements
 
-If the `BCI` environment already exists, update it with:
+The MATLAB starter workflows were tested with:
 
-```bash
-conda env update -n BCI -f environment.yml --prune
-conda activate BCI
-```
+- MATLAB R2025a
+- Signal Processing Toolbox
 
-### Verify the environment
-
-```bash
-python -V
-```
-
-The environment is configured around Python `3.10`.
-
-### Launch JupyterLab
-
-For the Python notebook starter workflow:
-
-```bash
-jupyter lab
-```
+The repository already includes the local helper code needed by the MATLAB starter workflow inside `starter/functions/`, including the GDF-loading utilities used by the starter scripts.
 
 ## 2. Experimental Data
 
-The main dataset folder used by this repository is:
+The primary experimental dataset lives in:
 
 ```text
 BCI_Harmony_ExperimentalData/
 ```
 
-Only a subset of the available subfolders are required for the code currently included in this repository.
+Many subfolders are present in the full dataset, but only a subset are required for the workflows currently implemented in this repository.
 
-### Data hierarchy
+### Data hierarchy used in this repo
 
 ```text
 BCI_Harmony_ExperimentalData/
-├── offline_data/        # offline .gdf recordings used by the starter workflows and Figure 2
-├── online_python_log/   # online log files used for Figures 3 and 4
-├── epoched_data_of/     # offline epoched .mat files used for Figures 5 and 6
-└── epoched_data_on/     # online epoched .mat files used for Figures 5 and 6
+├── offline_data/        # offline .gdf runs used by the starter workflows and Figure 2
+├── online_python_log/   # online session logs used by Figures 3 and 4
+├── epoched_data_of/     # offline epoched .mat files used by Figures 5 and 6
+└── epoched_data_on/     # online epoched .mat files used by Figures 5 and 6
 ```
 
 ### Required subfolders
 
 #### `offline_data/`
 
-This folder contains the offline recording runs for each subject. These recordings are stored as `.gdf` files, along with associated log files. In this repository, `offline_data/` is used for:
+This folder contains the subject-level offline recording runs. Each run is stored as a `.gdf` recording together with its associated `.log` file. In this repository, these recordings are used for:
 
-- the MATLAB starter preprocessing script
+- the MATLAB starter preprocessing workflow
 - the Python starter notebook
-- the grand-average spectrogram analysis for Figure 2
+- the grand-average offline spectrogram in Figure 2
 
-Typical contents are organized by subject and run, for example:
+Typical organization looks like:
 
 ```text
 offline_data/
@@ -95,39 +83,62 @@ offline_data/
         └── Sub_1_run_1_offline.log
 ```
 
+#### Offline trigger labels
+
+The event markers in the offline `.gdf` files are one of the least intuitive parts of the dataset. These trigger labels define the run structure and are the main reference points used to align the offline analyses.
+
+| Trigger | Meaning | Interpretation in the task |
+| --- | --- | --- |
+| `1000` | Start of run | Marks the beginning of an offline recording run |
+| `300` | Start of countdown | Beginning of the pre-task countdown period |
+| `100` | Begin start-MI | Onset of the movement-onset motor imagery period |
+| `150` | Robot starts moving | Exoskeleton movement onset |
+| `500` | Stop-MI | Onset of the movement-offset or stop-imagery period |
+| `550` | Robot stops | Exoskeleton movement offset |
+| `900` | Rest | Rest marker; in these data it occurs at the same timepoint as `550`, so it is redundant for timing |
+| `950` | Robot returns home | Return phase back to the home position |
+| `2000` | End of run | Marks the end of the offline recording run |
+
+A typical run therefore follows the sequence:
+
+```text
+1000 -> 300 -> 100 -> 150 -> 500 -> 550/900 -> 950 -> 2000
+```
+
+In practice:
+
+- `300` is the anchor used to align the countdown period before the task
+- `100` and `500` separate the onset and offset motor-imagery phases
+- `150`, `550`, and `950` capture the corresponding exoskeleton movement phases
+- `1000` and `2000` mark the run boundaries
+
+These event codes are especially important for understanding the starter preprocessing script and the grand-average spectrogram in Figure 2, because those analyses are organized around the temporal structure defined by these triggers.
+
 #### `online_python_log/`
 
-This folder contains the online experiment logs generated during online BCI sessions. In this repository, these logs are used to compute:
+This folder contains the online-session Python logs. These logs are parsed directly to compute:
 
-- online command-delivery summaries for Figure 3
-- online decoding-time analysis for Figure 4
+- command-delivery summaries for Figure 3
+- online decoding-time statistics for Figure 4
 
 #### `epoched_data_of/`
 
-This folder contains subject-level offline epoched data stored in MATLAB `.mat` files. In this repository, these files are used to compute offline reference and bias-related analyses that contribute to:
+This folder contains subject-level offline epoched MATLAB `.mat` files. These are used for the offline reference and bias analyses that feed:
 
 - Figure 5
 - Figure 6
 
 #### `epoched_data_on/`
 
-This folder contains subject-level online epoched data stored in MATLAB `.mat` files. These files are paired with the offline epoched data and are used for:
+This folder contains subject-level online epoched MATLAB `.mat` files. These are paired with the offline epoched files to evaluate online task-vs-fix behavior in:
 
-- task-vs-fix bias analysis
-- per-run AUC analysis
+- Figure 5
+- Figure 6
 
-### Important note on `data/`
-
-The repository also contains a top-level folder named `data/`, but this is different from `BCI_Harmony_ExperimentalData/`.
-
-- `BCI_Harmony_ExperimentalData/` contains the source experiment data
-- `data/` contains generated outputs such as CSV summaries and metadata created by the analysis scripts
 
 ## 3. Starter Code
 
-The `starter/` folder is intended to provide simple, readable entry points for working with one subject's offline data before moving into the larger group-level analysis scripts.
-
-### Contents of `starter/`
+The `starter/` folder is designed to give a new user a compact, readable entry point into the dataset before moving on to the full group-level figure scripts.
 
 ```text
 starter/
@@ -137,73 +148,59 @@ starter/
 └── functions/
 ```
 
-### `offline_preprocessing_starter.m`
+### `starter/offline_preprocessing_starter.m`
 
-This is the main MATLAB starter script. It is written as a script, not a function, and walks through a simple offline EEG preprocessing workflow using one subject's offline `.gdf` file.
+This MATLAB workflow opens one offline run and walks through the core preprocessing steps used throughout the project:
 
-The script includes commented sections that explain each step:
+- loading a `.gdf` file
+- selecting the EEG channels used in the analysis
+- removing auxiliary or unwanted channels
+- filtering the EEG
+- regressing out EOG activity
+- plotting quick quality-control views
+- generating a C3-centered task spectrogram aligned to the offline trigger structure
 
-1. locate the repository and dataset
-2. open one offline `.gdf` file
-3. identify EEG and auxiliary channels
-4. remove non-EEG channels and selected rejected channels
-5. apply filtering
-6. remove EOG-related activity by regression
-7. generate basic sanity-check plots
-8. generate a task spectrogram using the same general analysis style as the older MATLAB workflow
-
-To run it from MATLAB:
+Run it from MATLAB with:
 
 ```matlab
 cd('/path/to/bci_exo_startstop_ICRA_26');
 run('starter/offline_preprocessing_starter.m');
 ```
 
-### `offline_preprocessing_starter.ipynb`
+### `starter/offline_preprocessing_starter.ipynb`
 
-This notebook is the fully independent Python version of the offline starter workflow. It mirrors the same general processing flow as the MATLAB starter script, but does not depend on MATLAB.
+This notebook provides the same overall entry point in Python. It is useful for users who want to inspect one offline recording step by step and understand how the basic preprocessing and visualization pipeline is organized before running the paper-level scripts.
 
-It is useful if you want to:
-
-- inspect one offline run interactively
-- understand the preprocessing pipeline step by step
-- work entirely in Python
-
-Open it with JupyterLab after activating the Conda environment:
-
-```bash
-jupyter lab
-```
-
-### `extract_offline_trigger_labels.m`
+### `starter/extract_offline_trigger_labels.m`
 
 This MATLAB script scans all offline `.gdf` files and exports:
 
-- a per-run trigger inventory
-- a global list of unique trigger codes
+- a run-by-run trigger inventory
+- the global set of unique trigger labels across the offline dataset
 
 The outputs are written to:
 
-- `data/offline_trigger_inventory.csv`
-- `data/offline_unique_trigger_labels.txt`
+- `fig_data/offline_trigger_inventory.csv`
+- `fig_data/offline_unique_trigger_labels.txt`
 
 ### `starter/functions/`
 
-This folder contains MATLAB helper functions used by the starter MATLAB workflows. It includes the signal-processing utilities and supporting toolbox code needed by the scripts in `starter/`.
+This folder contains the MATLAB helper code used by the starter workflows. In most cases, a new user can treat it as support code and focus on the entry-point scripts above.
 
-In most cases, new users do not need to edit anything inside `starter/functions/` to get started.
+## 4. Reproducing the Python Figures
 
-## Reproducing the Python Figures
+The figure scripts in `scripts/` are fully data-driven and read directly from `BCI_Harmony_ExperimentalData/`. Generated outputs are written to:
 
-All current figure scripts in `scripts/` are designed to run directly from the dataset and generate outputs into the repository-level `data/` and `figures/` folders.
+- `fig_data/`
+- `figures/`
 
-Run all figure scripts with:
+Run all current figure scripts with:
 
 ```bash
 python scripts/run_all_figures.py
 ```
 
-Current figure scripts include:
+Current figure scripts are:
 
 - `scripts/figure2_grand_avg_spectrogram.py`
 - `scripts/figure3_online_command_delivery.py`

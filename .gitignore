@@ -5,4 +5,3 @@ __pycache__/
 *.pyc
 sopen.mat
 BCI_Harmony_ExperimentalData/
-fig_data/
