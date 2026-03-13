@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run all paper figure scripts (Fig. 1-4)."""
+"""Run all paper figure scripts."""
 
 from __future__ import annotations
 
@@ -9,10 +9,11 @@ from pathlib import Path
 
 
 SCRIPTS = [
-    "figure1_bias_shift_vs_identity.py",
-    "figure2_auc_by_run_task_vs_fix.py",
+    "figure2_spectrogram.py",
     "figure3_online_command_delivery.py",
     "figure4_online_decoding_time.py",
+    "figure5_bias_shift_vs_identity.py",
+    "figure6_auc_by_run_task_vs_fix.py",
 ]
 
 

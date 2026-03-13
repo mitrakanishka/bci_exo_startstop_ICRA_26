@@ -7,9 +7,13 @@ import argparse
 import sys
 from pathlib import Path
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
-from matplotlib.ticker import PercentFormatter
+from matplotlib.ticker import FixedLocator, PercentFormatter
+
+mpl.rcParams["pdf.fonttype"] = 42
+mpl.rcParams["ps.fonttype"] = 42
 
 THIS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = THIS_DIR.parent
@@ -62,9 +66,8 @@ def _phase_session_means(df_trials: pd.DataFrame) -> tuple[pd.DataFrame, pd.Data
     return on, off
 
 
-def make_figure(df_trials: pd.DataFrame, out_png: Path, out_pdf: Path, out_csv: Path) -> None:
-    on, off = _phase_session_means(df_trials)
-    mean_stack = pd.concat([on, off], ignore_index=True)
+def make_figure(mean_stack: pd.DataFrame, out_png: Path, out_pdf: Path, out_csv: Path) -> None:
+    mean_stack = mean_stack.copy()
 
     grid = pd.MultiIndex.from_product(
         [SESSIONS, PHASES, OUTCOMES], names=["session", "phase", "outcome"]
@@ -140,10 +143,23 @@ def make_figure(df_trials: pd.DataFrame, out_png: Path, out_pdf: Path, out_csv: 
                 bottom += h
 
     ax.set_ylim(0.0, 1.0)
-    ax.yaxis.set_major_formatter(PercentFormatter(1.0))
+    ax.margins(y=0.0)
+    y_ticks = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    ax.yaxis.set_major_locator(FixedLocator(y_ticks))
+    ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    # Keep the 100% label but remove its tick mark line.
+    for tick, yv in zip(ax.yaxis.get_major_ticks(), y_ticks):
+        if yv == 1.0:
+            tick.tick1line.set_visible(False)
+            tick.tick2line.set_visible(False)
     ax.set_xticks([])
-    ax.set_ylabel("")
-    ax.set_title("Online command-delivery accuracy", fontsize=20, fontweight="bold", pad=12)
+    ax.set_ylabel(
+        "Percentage of Trials (%)",
+        fontsize=13,
+        fontweight="bold",
+        fontfamily="DejaVu Sans",
+    )
+    ax.set_title("Online Command-Delivery Accuracy", fontsize=16, fontweight="bold", pad=12)
 
     xf = ax.get_xaxis_transform()
     for phase in PHASES:
@@ -167,6 +183,7 @@ def make_figure(df_trials: pd.DataFrame, out_png: Path, out_pdf: Path, out_csv: 
         transform=xf,
         fontsize=13,
         fontweight="bold",
+        fontfamily="DejaVu Sans",
     )
     ax.text(
         (x_off + (x_off + w_bar)) / 2,
@@ -177,15 +194,35 @@ def make_figure(df_trials: pd.DataFrame, out_png: Path, out_pdf: Path, out_csv: 
         transform=xf,
         fontsize=13,
         fontweight="bold",
+        fontfamily="DejaVu Sans",
     )
 
     handles = [
         plt.Line2D([0], [0], color=COLOR_MAP[k], lw=8, label=k.capitalize()) for k in OUTCOMES
     ]
-    ax.legend(handles=handles, loc="lower right", frameon=True, fontsize=9)
+    ax.legend(handles=handles, loc="lower right", frameon=True, fontsize=7)
 
     ax.grid(axis="y", linestyle=":", linewidth=1.0, alpha=0.55)
-    ax.spines[["top", "right"]].set_visible(False)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    # Draw one explicit border rectangle so all corners are perfectly flush.
+    border = plt.Rectangle(
+        (0.0, 0.0),
+        1.0,
+        1.0,
+        transform=ax.transAxes,
+        fill=False,
+        edgecolor="black",
+        linewidth=0.8,
+        antialiased=False,
+        joinstyle="miter",
+        capstyle="butt",
+        snap=True,
+        zorder=10,
+        clip_on=False,
+    )
+    ax.add_patch(border)
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     plt.subplots_adjust(bottom=0.22)
@@ -200,7 +237,7 @@ def main() -> None:
     parser.add_argument(
         "--log-root",
         type=Path,
-        default=REPO_ROOT / "BCI_course_EXP" / "online_python_log",
+        default=REPO_ROOT / "BCI_Harmony_ExperimentalData" / "online_python_log",
         help="Path to online_python_log directory.",
     )
     parser.add_argument(
@@ -218,13 +255,17 @@ def main() -> None:
     args = parser.parse_args()
 
     df = load_all_online_logs(args.log_root)
+    on, off = _phase_session_means(df)
+    mean_stack = pd.concat([on, off], ignore_index=True)
+
     make_figure(
-        df_trials=df,
+        mean_stack=mean_stack,
         out_png=args.outdir / "fig3_online_command_delivery_accuracy.png",
         out_pdf=args.outdir / "fig3_online_command_delivery_accuracy.pdf",
         out_csv=args.csv_out,
     )
     print("Saved Figure 3 outputs to", args.outdir)
+    print("Source: online log analysis")
 
 
 if __name__ == "__main__":

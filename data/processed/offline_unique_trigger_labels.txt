@@ -1,0 +1,4 @@
+Unique trigger codes across all offline files (decimal):
+100, 150, 300, 500, 550, 900, 950, 1000, 2000
+
+Count: 9

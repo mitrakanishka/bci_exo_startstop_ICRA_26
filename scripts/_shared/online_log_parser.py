@@ -104,7 +104,7 @@ def parse_online_log_file(path: Path) -> pd.DataFrame:
 
 
 def load_all_online_logs(log_root: Path) -> pd.DataFrame:
-    """Load all online logs under `BCI_course_EXP/online_python_log`."""
+    """Load all online logs under `BCI_Harmony_ExperimentalData/online_python_log`."""
     files: Iterable[Path] = sorted(log_root.glob("Sub_*/*.txt"))
     if not files:
         raise FileNotFoundError(f"No online python log files found under: {log_root}")

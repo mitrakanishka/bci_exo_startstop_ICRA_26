@@ -23,13 +23,13 @@ function DEMO_REFERENCE_BIAS_DISTANCE()
 %          and also for Delta_pos / Delta_neg
 %
 % Folder layout assumed:
-%   BCI_course_EXP/epoched_data_of/subj_###_epoched_data_of.mat
-%   BCI_course_EXP/epoched_data_on/subj_###_epoched_data_on.mat
+%   BCI_Harmony_ExperimentalData/epoched_data_of/subj_###_epoched_data_of.mat
+%   BCI_Harmony_ExperimentalData/epoched_data_on/subj_###_epoched_data_on.mat
 
 clc;
 
 repo_root = resolve_repo_root(fileparts(mfilename('fullpath')));
-root     = fullfile(repo_root,'BCI_course_EXP');
+root     = fullfile(repo_root,'BCI_Harmony_ExperimentalData');
 of_dir   = fullfile(root,'epoched_data_of');
 on_dir   = fullfile(root,'epoched_data_on');
 assert(exist(of_dir,'dir')==7 && exist(on_dir,'dir')==7, ...
@@ -378,10 +378,10 @@ end
 end
 
 function repo_root = resolve_repo_root(start_dir)
-% Resolve repository root by walking upward until BCI_course_EXP is found.
+% Resolve repository root by walking upward until BCI_Harmony_ExperimentalData is found.
 repo_root = start_dir;
 for k = 1:8
-    has_data = (exist(fullfile(repo_root,'BCI_course_EXP'),'dir') == 7);
+    has_data = (exist(fullfile(repo_root,'BCI_Harmony_ExperimentalData'),'dir') == 7);
     if has_data
         return;
     end
@@ -391,6 +391,6 @@ for k = 1:8
     end
     repo_root = parent;
 end
-error(['Could not locate repository root containing BCI_course_EXP. ', ...
+error(['Could not locate repository root containing BCI_Harmony_ExperimentalData. ', ...
        'Run from the project or place data folder under repo root.']);
 end

@@ -1,0 +1,7 @@
+.DS_Store
+.matplotlib/
+__pycache__/
+*.pyc
+sopen.mat
+BCI_Harmony_ExperimentalData/
+fig_data/

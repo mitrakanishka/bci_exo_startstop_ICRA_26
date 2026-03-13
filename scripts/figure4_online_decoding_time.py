@@ -7,10 +7,14 @@ import argparse
 import sys
 from pathlib import Path
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import matplotlib.patches as mpatches
+
+mpl.rcParams["pdf.fonttype"] = 42
+mpl.rcParams["ps.fonttype"] = 42
 
 THIS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = THIS_DIR.parent
@@ -23,6 +27,39 @@ from _shared.stats import paired_wilcoxon
 PHASE_ORDER = ["Onset", "Offset"]
 SESSION_ORDER = [2, 3]
 COLORS = {2: "#4C72B0", 3: "#55A868"}
+FONT_FAMILY = "DejaVu Sans"
+
+
+def _violin_span_at_y(body, y: float) -> tuple[float, float] | None:
+    """Return left/right x-span of a violin body at vertical position y."""
+    paths = body.get_paths()
+    if not paths:
+        return None
+
+    verts = paths[0].vertices
+    xs: list[float] = []
+    eps = 1e-9
+
+    for i in range(len(verts) - 1):
+        x1, y1 = verts[i]
+        x2, y2 = verts[i + 1]
+
+        # Edge lies on the target y-level.
+        if abs(y1 - y) < eps and abs(y2 - y) < eps:
+            xs.extend([float(x1), float(x2)])
+            continue
+
+        # Edge crosses the target y-level.
+        if (y1 <= y <= y2) or (y2 <= y <= y1):
+            dy = y2 - y1
+            if abs(dy) < eps:
+                continue
+            t = (y - y1) / dy
+            xs.append(float(x1 + t * (x2 - x1)))
+
+    if len(xs) < 2:
+        return None
+    return (min(xs), max(xs))
 
 
 def build_rt_table(df_trials: pd.DataFrame) -> pd.DataFrame:
@@ -103,6 +140,7 @@ def make_figure(df_rt: pd.DataFrame, out_png: Path, out_pdf: Path) -> None:
                 showmedians=False,
                 showextrema=False,
             )
+            violin_body = v["bodies"][0]
             for body in v["bodies"]:
                 body.set_facecolor(COLORS[sess])
                 body.set_edgecolor("none")
@@ -119,24 +157,34 @@ def make_figure(df_rt: pd.DataFrame, out_png: Path, out_pdf: Path) -> None:
             )
 
             m = float(np.mean(vals_real))
-            ax.hlines(m, pos - width * 0.24, pos + width * 0.24, colors="black", linewidth=1.0)
+            span = _violin_span_at_y(violin_body, m)
+            if span is None:
+                span = (pos - width * 0.24, pos + width * 0.24)
+            ax.hlines(m, span[0], span[1], colors="black", linewidth=1.0)
 
     ax.set_xlim(0.55, 2.45)
     ax.set_ylim(0, 6)
     ax.set_yticks(np.arange(0, 7, 1))
     ax.set_xticks([1.0, 2.0])
-    ax.set_xticklabels(PHASE_ORDER, fontsize=16, fontweight="bold")
-    ax.set_ylabel("Decoding time (s)", fontsize=16, fontweight="bold")
-    ax.set_title("Online Decoding Time", fontsize=22, fontweight="bold", pad=10)
+    ax.set_xticklabels(PHASE_ORDER, fontsize=13, fontweight="bold", fontfamily=FONT_FAMILY)
+    ax.set_ylabel("Decoding Time (s)", fontsize=13, fontweight="bold", fontfamily=FONT_FAMILY)
+    ax.set_title("Online Decoding Time", fontsize=16, fontweight="bold", fontfamily=FONT_FAMILY, pad=10)
 
     handles = [
         mpatches.Patch(color=COLORS[2], alpha=0.5, label="Session 2"),
         mpatches.Patch(color=COLORS[3], alpha=0.5, label="Session 3"),
     ]
-    ax.legend(handles=handles, loc="upper right", frameon=True, fontsize=9)
+    ax.legend(handles=handles, loc="lower right", frameon=True, prop={"family": FONT_FAMILY, "size": 9})
+
+    for tick in ax.get_yticklabels():
+        tick.set_fontfamily(FONT_FAMILY)
 
     ax.grid(axis="y", linestyle="-", linewidth=1.0, alpha=0.32)
     ax.spines[["top", "right"]].set_visible(False)
+    for side in ["left", "bottom"]:
+        ax.spines[side].set_visible(True)
+        ax.spines[side].set_color("black")
+        ax.spines[side].set_linewidth(0.8)
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout()
@@ -150,7 +198,7 @@ def main() -> None:
     parser.add_argument(
         "--log-root",
         type=Path,
-        default=REPO_ROOT / "BCI_course_EXP" / "online_python_log",
+        default=REPO_ROOT / "BCI_Harmony_ExperimentalData" / "online_python_log",
         help="Path to online_python_log directory.",
     )
     parser.add_argument(
