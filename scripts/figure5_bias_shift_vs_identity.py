@@ -157,7 +157,7 @@ def main() -> None:
     parser.add_argument(
         "--subject-csv",
         type=Path,
-        default=REPO_ROOT / "data" / "processed" / "fig5_bias_task_vs_identity.csv",
+        default=REPO_ROOT / "data" / "fig5_bias_task_vs_identity.csv",
         help="Path to save per-subject bias metrics.",
     )
     parser.add_argument(
@@ -169,13 +169,13 @@ def main() -> None:
     parser.add_argument(
         "--outdir",
         type=Path,
-        default=REPO_ROOT / "figures" / "paper",
+        default=REPO_ROOT / "figures",
         help="Output figure directory.",
     )
     parser.add_argument(
         "--summary-csv",
         type=Path,
-        default=REPO_ROOT / "data" / "processed" / "fig5_summary_stats.csv",
+        default=REPO_ROOT / "data" / "fig5_summary_stats.csv",
         help="Path to save mean/CI summary table.",
     )
     args = parser.parse_args()

@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 SCRIPTS = [
-    "figure2_spectrogram.py",
+    "figure2_grand_avg_spectrogram.py",
     "figure3_online_command_delivery.py",
     "figure4_online_decoding_time.py",
     "figure5_bias_shift_vs_identity.py",

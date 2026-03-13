@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 
 os.environ.setdefault("MPLCONFIGDIR", str(Path(__file__).resolve().parent.parent / ".matplotlib"))
+os.environ.setdefault("NUMBA_CACHE_DIR", str(Path(__file__).resolve().parent.parent / ".numba_cache"))
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -238,19 +239,19 @@ def main() -> None:
     parser.add_argument(
         "--matrix-csv",
         type=Path,
-        default=REPO_ROOT / "data" / "processed" / "fig2_spectrogram_matrix.csv",
+        default=REPO_ROOT / "data" / "fig2_grand_avg_spectrogram_matrix.csv",
         help="Path to save the grand-average PSD matrix.",
     )
     parser.add_argument(
         "--meta-json",
         type=Path,
-        default=REPO_ROOT / "data" / "processed" / "fig2_spectrogram_meta.json",
+        default=REPO_ROOT / "data" / "fig2_grand_avg_spectrogram_meta.json",
         help="Path to save figure metadata.",
     )
     parser.add_argument(
         "--outdir",
         type=Path,
-        default=REPO_ROOT / "figures" / "paper",
+        default=REPO_ROOT / "figures",
         help="Output figure directory.",
     )
     args = parser.parse_args()
@@ -281,8 +282,8 @@ def main() -> None:
     make_figure(
         matrix=grand_average,
         meta=meta,
-        out_png=args.outdir / "fig2_spectrogram.png",
-        out_pdf=args.outdir / "fig2_spectrogram.pdf",
+        out_png=args.outdir / "fig2_grand_avg_spectrogram.png",
+        out_pdf=args.outdir / "fig2_grand_avg_spectrogram.pdf",
     )
     print("Saved Figure 2 outputs to", args.outdir)
 

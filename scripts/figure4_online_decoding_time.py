@@ -204,13 +204,13 @@ def main() -> None:
     parser.add_argument(
         "--outdir",
         type=Path,
-        default=REPO_ROOT / "figures" / "paper",
+        default=REPO_ROOT / "figures",
         help="Output figure directory.",
     )
     parser.add_argument(
         "--stats-out",
         type=Path,
-        default=REPO_ROOT / "data" / "processed" / "fig4_session2_vs3_stats.csv",
+        default=REPO_ROOT / "data" / "fig4_session2_vs3_stats.csv",
         help="Path to save paired-session stats.",
     )
     args = parser.parse_args()

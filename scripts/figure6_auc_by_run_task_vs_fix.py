@@ -211,7 +211,7 @@ def main() -> None:
     parser.add_argument(
         "--subject-run-csv",
         type=Path,
-        default=REPO_ROOT / "data" / "processed" / "fig6_auc_subject_run.csv",
+        default=REPO_ROOT / "data" / "fig6_auc_subject_run.csv",
         help="Path to save per-subject per-run AUC values.",
     )
     parser.add_argument(
@@ -223,13 +223,13 @@ def main() -> None:
     parser.add_argument(
         "--outdir",
         type=Path,
-        default=REPO_ROOT / "figures" / "paper",
+        default=REPO_ROOT / "figures",
         help="Output figure directory.",
     )
     parser.add_argument(
         "--summary-csv",
         type=Path,
-        default=REPO_ROOT / "data" / "processed" / "fig6_run_level_summary.csv",
+        default=REPO_ROOT / "data" / "fig6_run_level_summary.csv",
         help="Path to save run-level summary table.",
     )
     args = parser.parse_args()

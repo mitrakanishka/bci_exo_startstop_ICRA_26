@@ -1,0 +1,18 @@
+name: BCI
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - mne
+  - numpy
+  - scipy
+  - pandas
+  - pyriemann
+  - scikit-learn
+  - matplotlib
+  - jupyterlab
+  - ipykernel
+  - pip
+  - pip:
+      - dill

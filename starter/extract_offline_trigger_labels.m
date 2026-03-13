@@ -1,7 +1,7 @@
 %% Extract trigger labels (codes) from all offline GDF files
 % Outputs:
-%   - data/processed/offline_trigger_inventory.csv
-%   - data/processed/offline_unique_trigger_labels.txt
+%   - data/offline_trigger_inventory.csv
+%   - data/offline_unique_trigger_labels.txt
 
 clear; clc;
 
@@ -59,7 +59,7 @@ end
 T = table(subject_id, run_id, file_relpath, n_events, n_unique, unique_trigger_codes);
 T = sortrows(T, {'subject_id', 'run_id'});
 
-out_dir = fullfile(repo_root, 'data', 'processed');
+out_dir = fullfile(repo_root, 'data');
 if exist(out_dir, 'dir') ~= 7
     mkdir(out_dir);
 end
