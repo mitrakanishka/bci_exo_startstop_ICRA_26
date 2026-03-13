@@ -5,7 +5,7 @@ Repository for the paper: **Real-Time Decoding of Movement Onset and Offset for 
 This repository contains:
 
 - starter workflows for loading and preprocessing offline EEG recordings
-- reproducible Python scripts for regenerating the paper figures directly from the experiment data
+- mirrored MATLAB and Python figure-generation pipelines that regenerate the paper results directly from the experiment data
 - figure-ready outputs written to `fig_data/` and `figures/`
 
 The repository assumes the experimental dataset folder `BCI_Harmony_ExperimentalData/` is placed at the repository root and kept outside version control.
@@ -16,8 +16,8 @@ The repository assumes the experimental dataset folder `BCI_Harmony_Experimental
 bci_exo_startstop_ICRA_26/
 ├── BCI_Harmony_ExperimentalData/   # local experiment data used by the analyses
 ├── starter/                        # entry-point MATLAB and Python starter workflows
-├── scripts/                        # reproducible figure-generation scripts
-├── fig_data/                       # generated tables, metadata, and trigger inventories
+├── scripts/                        # mirrored MATLAB and Python figure-generation code
+├── fig_data/                       # generated tables and metadata used by the figures
 ├── figures/                        # generated paper figures
 ├── environment.yml                 # Python environment definition
 └── LICENSE
@@ -144,7 +144,6 @@ The `starter/` folder is designed to give a new user a compact, readable entry p
 starter/
 ├── offline_preprocessing_starter.m
 ├── offline_preprocessing_starter.ipynb
-├── extract_offline_trigger_labels.m
 └── functions/
 ```
 
@@ -171,42 +170,49 @@ run('starter/offline_preprocessing_starter.m');
 
 This notebook provides the same overall entry point in Python. It is useful for users who want to inspect one offline recording step by step and understand how the basic preprocessing and visualization pipeline is organized before running the paper-level scripts.
 
-### `starter/extract_offline_trigger_labels.m`
-
-This MATLAB script scans all offline `.gdf` files and exports:
-
-- a run-by-run trigger inventory
-- the global set of unique trigger labels across the offline dataset
-
-The outputs are written to:
-
-- `fig_data/offline_trigger_inventory.csv`
-- `fig_data/offline_unique_trigger_labels.txt`
-
 ### `starter/functions/`
 
 This folder contains the MATLAB helper code used by the starter workflows. In most cases, a new user can treat it as support code and focus on the entry-point scripts above.
 
-## 4. Reproducing the Python Figures
+## 4. Reproducing the Figures
 
-The figure scripts in `scripts/` are fully data-driven and read directly from `BCI_Harmony_ExperimentalData/`. Generated outputs are written to:
+The figure pipelines in `scripts/python/` and `scripts/matlab/` are both fully data-driven and read directly from `BCI_Harmony_ExperimentalData/`. Both language implementations write their outputs to the same locations:
 
 - `fig_data/`
 - `figures/`
 
-Run all current figure scripts with:
+### Python
 
 ```bash
-python scripts/run_all_figures.py
+python scripts/python/run_all_figures.py
 ```
 
-Current figure scripts are:
+### MATLAB
 
-- `scripts/figure2_grand_avg_spectrogram.py`
-- `scripts/figure3_online_command_delivery.py`
-- `scripts/figure4_online_decoding_time.py`
-- `scripts/figure5_bias_shift_vs_identity.py`
-- `scripts/figure6_auc_by_run_task_vs_fix.py`
+Run from the repository root:
+
+```matlab
+addpath('scripts/matlab');
+run_all_figures
+```
+
+### Mirrored figure scripts
+
+Python:
+
+- `scripts/python/figure2_grand_avg_spectrogram.py`
+- `scripts/python/figure3_online_command_delivery.py`
+- `scripts/python/figure4_online_decoding_time.py`
+- `scripts/python/figure5_bias_shift_vs_identity.py`
+- `scripts/python/figure6_auc_by_run_task_vs_fix.py`
+
+MATLAB:
+
+- `scripts/matlab/figure2_grand_avg_spectrogram.m`
+- `scripts/matlab/figure3_online_command_delivery.m`
+- `scripts/matlab/figure4_online_decoding_time.m`
+- `scripts/matlab/figure5_bias_shift_vs_identity.m`
+- `scripts/matlab/figure6_auc_by_run_task_vs_fix.m`
 
 ## Citation
 

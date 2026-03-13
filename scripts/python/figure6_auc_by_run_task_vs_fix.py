@@ -16,7 +16,7 @@ mpl.rcParams["pdf.fonttype"] = 42
 mpl.rcParams["ps.fonttype"] = 42
 
 THIS_DIR = Path(__file__).resolve().parent
-REPO_ROOT = THIS_DIR.parent
+REPO_ROOT = THIS_DIR.parents[1]
 sys.path.insert(0, str(THIS_DIR))
 
 from _shared.recentering_analysis import compute_recentering_tables
@@ -27,7 +27,7 @@ PHASE_ORDER = ["ONSET", "OFFSET"]
 SCHEME_ORDER = ["TASK", "FIX"]
 SCHEME_COLORS = {"TASK": "#E6862A", "FIX": "#2979FF"}
 FONT_FAMILY = "DejaVu Sans"
-LINE_WIDTH = 2.6
+LINE_WIDTH = 2.0
 RUNS = np.arange(1, 9)
 
 
@@ -103,10 +103,10 @@ def make_figure(summary: pd.DataFrame, pvals: dict[str, float], out_png: Path, o
     fig, axes = plt.subplots(2, 1, figsize=(7.2, 8.0), dpi=300, sharey=True)
     fig.suptitle(
         "AUC: Task vs Fixation-Based Recentering",
-        fontsize=16,
+        fontsize=20,
         fontweight="bold",
         fontfamily=FONT_FAMILY,
-        y=0.95,
+        y=0.99,
     )
 
     for i, phase in enumerate(PHASE_ORDER):
@@ -131,9 +131,9 @@ def make_figure(summary: pd.DataFrame, pvals: dict[str, float], out_png: Path, o
                 label=scheme,
             )
 
-        ax.axhline(0.5, color="black", lw=LINE_WIDTH, ls="--", zorder=0)
+        ax.axhline(0.5, color="0.55", lw=1.0, ls="--", zorder=0)
         ax.set_title(phase.title(), fontsize=13, fontweight="bold", fontfamily=FONT_FAMILY, pad=2)
-        ax.set_ylabel("AUC", fontsize=13, fontweight="bold", fontfamily=FONT_FAMILY)
+        ax.set_ylabel("AUC", fontsize=12, fontweight="bold", fontfamily=FONT_FAMILY)
         ax.set_xlim(1, 8)
         ax.set_ylim(0.30, 1.01)
         ax.set_xticks(RUNS)
@@ -161,13 +161,13 @@ def make_figure(summary: pd.DataFrame, pvals: dict[str, float], out_png: Path, o
             leg_handles = [
                 plt.Line2D([0], [0], color=SCHEME_COLORS["FIX"], lw=LINE_WIDTH, marker="o", label="FIX"),
                 plt.Line2D([0], [0], color=SCHEME_COLORS["TASK"], lw=LINE_WIDTH, marker="o", label="TASK"),
-                plt.Line2D([0], [0], color="black", lw=LINE_WIDTH, ls="--", label="Chance"),
+                plt.Line2D([0], [0], color="0.55", lw=1.0, ls="--", label="Chance"),
             ]
             ax.legend(
                 handles=leg_handles,
                 loc="lower left",
                 frameon=True,
-                prop={"family": FONT_FAMILY, "size": 10},
+                prop={"family": FONT_FAMILY, "size": 11},
             )
 
         ax.grid(axis="both", linestyle="-", linewidth=0.6, alpha=0.2)
@@ -181,7 +181,7 @@ def make_figure(summary: pd.DataFrame, pvals: dict[str, float], out_png: Path, o
 
     axes[-1].set_xlabel(
         "Session Number, Run Number",
-        fontsize=13,
+        fontsize=12,
         fontweight="bold",
         fontfamily=FONT_FAMILY,
         labelpad=10,

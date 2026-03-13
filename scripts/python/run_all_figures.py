@@ -19,7 +19,7 @@ SCRIPTS = [
 
 def main() -> None:
     script_dir = Path(__file__).resolve().parent
-    repo_root = script_dir.parent
+    repo_root = script_dir.parents[1]
     for script in SCRIPTS:
         path = script_dir / script
         print(f"\n=== Running {script} ===")

@@ -8,8 +8,11 @@ import json
 import os
 from pathlib import Path
 
-os.environ.setdefault("MPLCONFIGDIR", str(Path(__file__).resolve().parent.parent / ".matplotlib"))
-os.environ.setdefault("NUMBA_CACHE_DIR", str(Path(__file__).resolve().parent.parent / ".numba_cache"))
+FILE_PATH = Path(__file__).resolve()
+REPO_ROOT = FILE_PATH.parents[2]
+
+os.environ.setdefault("MPLCONFIGDIR", str(REPO_ROOT / ".matplotlib"))
+os.environ.setdefault("NUMBA_CACHE_DIR", str(REPO_ROOT / ".numba_cache"))
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -20,8 +23,7 @@ from scipy.signal import butter, filtfilt, welch
 mpl.rcParams["pdf.fonttype"] = 42
 mpl.rcParams["ps.fonttype"] = 42
 
-THIS_DIR = Path(__file__).resolve().parent
-REPO_ROOT = THIS_DIR.parent
+THIS_DIR = FILE_PATH.parent
 FONT_FAMILY = "DejaVu Sans"
 KEEP_IDX = np.array([4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]) - 1
 EVENT_SECONDS = np.array([0.2, 3.0, 6.0, 9.0, 12.0, 15.0, 17.0], dtype=float)
