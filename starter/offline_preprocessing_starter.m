@@ -221,3 +221,155 @@ set(gca, 'FontSize', 14, 'Box', 'off');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title(sprintf('Task Spectrogram (%s)', spec_labels(spec_ch_idx)));
+
+%% 8) Plot grand-average topoplots for each task condition
+% Recent motor-imagery EEG papers usually show scalp maps of
+% baseline-normalized mu/beta power (ERD/ERS). Here we use 8-30 Hz power
+% in dB relative to the countdown part of each trial, average within each
+% subject first, and then take the grand average across subjects.
+% Negative values mean band-power suppression (ERD); positive values mean
+% a power rebound (ERS). Because countdown is the reference, its map
+% should stay close to 0 dB.
+topo_band_hz = [8 30];
+cond_names = {'Countdown', 'Start MI', 'Robot moves', 'Stop MI', 'Rest', 'Robot returns'};
+
+all_labels_upper = upper(string(chan_labels(:)));
+topo_drop = any(contains(all_labels_upper, ...
+    ["TRIG", "STATUS", "STI", "MARK", "AUX", "EMG", "ECG", "EOG", "HEOG", "VEOG", "SENS"]), 2);
+topo_labels = string(chan_labels(~topo_drop));
+
+loc_hdr = struct();
+loc_hdr.Label = cellstr(topo_labels(:));
+loc_hdr.NS = numel(topo_labels);
+loc_hdr = leadidcodexyz(loc_hdr);
+loc_keep = all(~isnan(loc_hdr.ELEC.XYZ), 2);
+topo_labels = topo_labels(loc_keep);
+topo_xyz = loc_hdr.ELEC.XYZ(loc_keep, :);
+topo_theta = -atan2d(topo_xyz(:, 2), topo_xyz(:, 1));
+topo_radius = 0.5 - asind(topo_xyz(:, 3) ./ sqrt(sum(topo_xyz .^ 2, 2))) / 180;
+topo_chanlocs = struct( ...
+    'labels', cellstr(topo_labels(:)), ...
+    'theta', num2cell(topo_theta), ...
+    'radius', num2cell(topo_radius), ...
+    'X', num2cell(topo_xyz(:, 1)), ...
+    'Y', num2cell(topo_xyz(:, 2)), ...
+    'Z', num2cell(topo_xyz(:, 3)));
+
+[b_topo, a_topo] = butter(2, [0.1 45] / (fs / 2), 'bandpass');
+[b_smr, a_smr] = butter(2, topo_band_hz / (fs / 2), 'bandpass');
+subject_dirs = dir(fullfile(dataset_root, 'offline_data', 'Sub_*'));
+subject_dirs = subject_dirs([subject_dirs.isdir]);
+[~, order] = sort(string({subject_dirs.name}));
+subject_dirs = subject_dirs(order);
+subject_maps = nan(numel(topo_labels), numel(cond_names), numel(subject_dirs));
+
+for i_subject = 1:numel(subject_dirs)
+    run_files = dir(fullfile(subject_dirs(i_subject).folder, subject_dirs(i_subject).name, '*offline*', '*.gdf'));
+    if isempty(run_files)
+        continue;
+    end
+
+    [~, order] = sort(fullfile(string({run_files.folder}), string({run_files.name})));
+    run_files = run_files(order);
+    subject_sum = zeros(numel(topo_labels), numel(cond_names));
+    subject_n = 0;
+
+    for i_run = 1:numel(run_files)
+        [run_signal, run_HDR] = sload(fullfile(run_files(i_run).folder, run_files(i_run).name));
+        run_labels = strtrim(cellstr(run_HDR.Label));
+        run_labels_upper = upper(string(run_labels(:)));
+        [has_topo, topo_idx] = ismember(upper(topo_labels), run_labels_upper);
+        if ~all(has_topo)
+            continue;
+        end
+
+        run_eeg = double(run_signal(:, topo_idx));
+        run_eeg = filtfilt(b_topo, a_topo, run_eeg);
+
+        run_eog_idx = find(any(contains(run_labels_upper, ["EOG", "HEOG", "VEOG"]), 2));
+        if ~isempty(run_eog_idx)
+            run_eog = filtfilt(b_topo, a_topo, double(run_signal(:, run_eog_idx)));
+            run_beta = filterEOG(run_eeg, run_eog);
+            run_eeg = run_eeg - run_eog * run_beta;
+        end
+
+        run_eeg = run_eeg - mean(run_eeg, 2);
+        run_smr = filtfilt(b_smr, a_smr, run_eeg);
+
+        typ = double(run_HDR.EVENT.TYP(:));
+        pos = double(run_HDR.EVENT.POS(:));
+        p300 = pos(typ == 300);
+        p100 = pos(typ == 100);
+        p150 = pos(typ == 150);
+        p500 = pos(typ == 500);
+        p550 = pos(typ == 550);
+        p900 = pos(typ == 900);
+        p950 = pos(typ == 950);
+        p2000 = pos(typ == 2000);
+        n_trials = min([numel(p300), numel(p100), numel(p150), numel(p500), numel(p550), numel(p900), numel(p950)]);
+
+        for i_trial = 1:n_trials
+            trial_end = size(run_smr, 1);
+            if i_trial < numel(p300)
+                trial_end = min(trial_end, p300(i_trial + 1) - 1);
+            elseif ~isempty(p2000)
+                trial_end = min(trial_end, p2000(1) - 1);
+            end
+
+            stop_pos = min(p550(i_trial), p900(i_trial));
+            segments = [
+                p300(i_trial), p100(i_trial) - 1;
+                p100(i_trial), p150(i_trial) - 1;
+                p150(i_trial), p500(i_trial) - 1;
+                p500(i_trial), stop_pos - 1;
+                p900(i_trial), p950(i_trial) - 1;
+                p950(i_trial), trial_end
+            ];
+
+            if any(segments(:, 1) < 1) || any(segments(:, 2) > size(run_smr, 1)) || any(diff(segments, 1, 2) < round(0.5 * fs))
+                continue;
+            end
+
+            baseline_pow = mean(run_smr(segments(1, 1):segments(1, 2), :) .^ 2, 1) + eps;
+            cond_map = zeros(numel(topo_labels), numel(cond_names));
+            for i_cond = 1:numel(cond_names)
+                seg = segments(i_cond, 1):segments(i_cond, 2);
+                cond_pow = mean(run_smr(seg, :) .^ 2, 1) + eps;
+                cond_map(:, i_cond) = 10 * log10(cond_pow ./ baseline_pow)';
+            end
+
+            subject_sum = subject_sum + cond_map;
+            subject_n = subject_n + 1;
+        end
+    end
+
+    if subject_n > 0
+        subject_maps(:, :, i_subject) = subject_sum / subject_n;
+    end
+end
+
+valid_subjects = squeeze(any(any(isfinite(subject_maps), 1), 2));
+grand_maps = mean(subject_maps(:, :, valid_subjects), 3, 'omitnan');
+clim_max = max(abs(grand_maps(:)));
+blue_red = [linspace(0, 1, 128)', linspace(0, 1, 128)', ones(128, 1); ...
+    ones(128, 1), linspace(1, 0, 128)', linspace(1, 0, 128)'];
+
+figure('Color', 'w', 'Name', 'Grand-average SMR topoplots', 'Position', [50 50 1200 700]);
+for i_cond = 1:numel(cond_names)
+    subplot(2, 3, i_cond);
+    topoplot(grand_maps(:, i_cond), topo_chanlocs, ...
+        'maplimits', [-clim_max clim_max], ...
+        'electrodes', 'off', ...
+        'numcontour', 6);
+    title(cond_names{i_cond}, 'FontSize', 14);
+end
+colormap(blue_red);
+cb = colorbar('Position', [0.92 0.16 0.02 0.68]);
+cb.Label.String = 'SMR power change (dB vs countdown)';
+topo_title = annotation('textbox', [0.20 0.95 0.60 0.04], ...
+    'String', sprintf('Grand-average topoplots (%d subjects, %d-%d Hz)', ...
+    sum(valid_subjects), topo_band_hz(1), topo_band_hz(2)), ...
+    'EdgeColor', 'none', ...
+    'HorizontalAlignment', 'center', ...
+    'FontWeight', 'bold', ...
+    'FontSize', 14);
