@@ -1,6 +1,6 @@
 # Real-Time Onset and Offset BCI Exoskeleton
 
-[Project Website](https://mitrakanishka9732.github.io/mitrakanishka.github.io/publications/real-time-decoding-movement-onset-offset/)
+[Project Website](https://mitrakanishka.github.io/publications/real-time-decoding-movement-onset-offset/)
 
 Repository for the paper: **Real-Time Decoding of Movement Onset and Offset for Brain-Controlled Rehabilitation Exoskeleton**
 
