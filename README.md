@@ -1,5 +1,7 @@
 # Real-Time Onset and Offset BCI Exoskeleton
 
+[Project Website](https://mitrakanishka9732.github.io/mitrakanishka.github.io/publications/real-time-decoding-movement-onset-offset/)
+
 Repository for the paper: **Real-Time Decoding of Movement Onset and Offset for Brain-Controlled Rehabilitation Exoskeleton**
 
 This repository contains:
@@ -9,6 +11,23 @@ This repository contains:
 - figure-ready outputs written to `fig_data/` and `figures/`
 
 The repository assumes the experimental dataset folder `BCI_Harmony_ExperimentalData/` is placed at the repository root and kept outside version control.
+
+## Share and Clone
+
+If you want to link this repository from a website, the main repository URL is:
+
+```text
+https://github.com/mitrakanishka9732/bci_exo_startstop_ICRA_26
+```
+
+Users can clone it with:
+
+```bash
+git clone https://github.com/mitrakanishka9732/bci_exo_startstop_ICRA_26.git
+cd bci_exo_startstop_ICRA_26
+```
+
+Important: the repository does not include the local experimental dataset folder `BCI_Harmony_ExperimentalData/`, so anyone using the full analysis pipeline will also need access to that dataset separately.
 
 ## Repository Overview
 
