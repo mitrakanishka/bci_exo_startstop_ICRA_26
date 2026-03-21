@@ -2,6 +2,8 @@
 
 [Project Website](https://mitrakanishka.github.io/publications/real-time-decoding-movement-onset-offset/)
 
+[Paper (arXiv)](https://arxiv.org/abs/2603.16825)
+
 Repository for the paper: **Real-Time Decoding of Movement Onset and Offset for Brain-Controlled Rehabilitation Exoskeleton**
 
 This repository contains:
@@ -235,7 +237,17 @@ MATLAB:
 
 ## Citation
 
-<!-- Citation information to be added -->
+```bibtex
+@misc{mitra2026realtimedecodingmovementonset,
+      title={Real-Time Decoding of Movement Onset and Offset for Brain-Controlled Rehabilitation Exoskeleton},
+      author={Kanishka Mitra and Satyam Kumar and Frigyes Samuel Racz and Deland Liu and Ashish D. Deshpande and José del R. Millán},
+      year={2026},
+      eprint={2603.16825},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2603.16825},
+}
+```
 
 ## Questions
 
